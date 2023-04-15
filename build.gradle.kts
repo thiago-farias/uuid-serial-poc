@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.6.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("com.avast.gradle.docker-compose") version "0.14.0"
     kotlin("jvm") version "1.8.0"
 }
 
@@ -13,6 +14,7 @@ repositories {
     mavenCentral()
 }
 
+// Begin integration test boiler plate
 sourceSets {
     create("integration") {
         compileClasspath += sourceSets.test.get().output
@@ -43,6 +45,19 @@ kotlin.target.compilations.getByName("integration") {
     associateWith(target.compilations.getByName("main"))
 }
 
+dockerCompose {
+    useComposeFiles.add("src/integration/resources/docker-compose.yml")
+    isRequiredBy(integrationTest)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "failed", "skipped")
+        setExceptionFormat("full")
+    }
+}
+// End integration test boiler plate
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -52,10 +67,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 kotlin {

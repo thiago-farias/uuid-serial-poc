@@ -40,7 +40,9 @@ data class Exemplo(
 
 // Interface do repositório JPA
 @Repository
-interface ExemploRepository : JpaRepository<Exemplo, UUID>
+interface ExemploRepository : JpaRepository<Exemplo, UUID> {
+    fun findByDescription(description: String): Exemplo
+}
 
 // Controlador REST
 @RestController
